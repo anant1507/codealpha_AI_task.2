@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>FAQ Chatbot</title>
+</head>
+<body>
+    <div class="container">
+        <h1>FAQ Chatbot</h1>
+        <div class="chatbox">
+            <div id="chat-log"></div>
+            <form id="chat-form" autocomplete="off">
+                <input id="chat-input" type="text" placeholder="Type a message..." />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatLog = document.getElementById('chat-log');
+
+        chatForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const userText = chatInput.value;
+            if (userText.trim() === "") return; // Skip if input is empty
+            
+            // Display user message
+            chatLog.innerHTML += `<div class="user-message">${userText}</div>`;
+            console.log('User Message Sent:', userText);  // Debugging log
+
+            // Send user input to the server
+            fetch('/get', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ msg: userText })  // Sending JSON
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Bot Response Received:', data);  // Debugging log
+                // Display chatbot response
+                chatLog.innerHTML += `<div class="bot-message">${data}</div>`;
+                chatInput.value = ''; // Clear input field
+                chatLog.scrollTop = chatLog.scrollHeight; // Scroll to the bottom
+            })
+            .catch(error => {
+                console.error('Error:', error);  // Log any errors
+            });
+        });
+    </script>
+</body>
+</html>
